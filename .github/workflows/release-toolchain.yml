@@ -28,7 +28,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Download GHCup
         shell: powershell
@@ -40,7 +40,7 @@ jobs:
           "GHCUP_SHA256=$hash" >> $env:GITHUB_ENV
 
       - name: Restore GHCup download cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: C:\ghcup\cache
           key: ghcup-windows-${{ inputs.ghc }}-${{ inputs.cabal }}-${{ inputs.hls }}-${{ inputs.stack }}
@@ -82,7 +82,7 @@ jobs:
           } finally { Pop-Location }
 
       - name: Publish organization-hosted assets
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        uses: softprops/action-gh-release@5113cdc90fd4d541c801c55356214017bf5ae34b # v3
         with:
           tag_name: toolchain
           name: Portable Haskell toolchain
