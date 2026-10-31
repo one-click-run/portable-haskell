@@ -1,4 +1,5 @@
 param(
+    [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$Command,
     [switch]$Check
 )

@@ -94,7 +94,7 @@ jobs:
 
             $main = Join-Path $portableRoot "examples\hello\Main.hs"
             $hello = Join-Path $testRoot "hello.exe"
-            & powershell -NoProfile -ExecutionPolicy Bypass -File $enter -Command @("ghc", $main, "-o", $hello)
+            & powershell -NoProfile -ExecutionPolicy Bypass -File $enter -Command ghc $main -o $hello
             if ($LASTEXITCODE -ne 0) { throw "Hello World compilation failed." }
             $output = (& $hello).Trim()
             if ($output -ne "Hello from portable Haskell!") {
