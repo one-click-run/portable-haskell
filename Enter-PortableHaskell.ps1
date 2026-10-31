@@ -25,9 +25,13 @@ $env:XDG_STATE_HOME = Join-Path $data "xdg-state"
 @($env:CABAL_DIR, $env:STACK_ROOT, $env:XDG_CACHE_HOME, $env:XDG_CONFIG_HOME, $env:XDG_DATA_HOME, $env:XDG_STATE_HOME) |
     ForEach-Object { New-Item -ItemType Directory -Path $_ -Force | Out-Null }
 
-# Add the bundled tools first. Each GHCup isolated install has its own bin folder.
-@("ghc\bin", "cabal\bin", "hls\bin", "stack\bin") |
-    ForEach-Object { Add-Path (Join-Path $root $_) }
+# GHCup's isolated Windows layout differs by tool: GHC uses <root>\bin,
+# while Cabal, HLS, and Stack may place executables directly in <root>.
+# Add both locations and never rely on a machine-wide installation.
+foreach ($toolRoot in @("ghc", "cabal", "hls", "stack")) {
+    Add-Path (Join-Path $root $toolRoot)
+    Add-Path (Join-Path $root "$toolRoot\bin")
+}
 
 # GHC's Windows distribution includes the matching MinGW toolchain. Discover it
 # instead of encoding a version-specific path, so the whole folder can move.
@@ -42,6 +46,9 @@ if ($Check) {
         $resolved = Get-Command $tool -ErrorAction SilentlyContinue
         if (-not $resolved) {
             throw "Missing tool: $tool"
+        }
+        if (-not $resolved.Source.StartsWith($root, [StringComparison]::OrdinalIgnoreCase)) {
+            throw "$tool resolved outside the portable directory: $($resolved.Source)"
         }
         Write-Host ("{0}: {1}" -f $tool, $resolved.Source)
     }

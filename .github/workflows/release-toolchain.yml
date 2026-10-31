@@ -37,6 +37,12 @@ jobs:
             -Uri "https://downloads.haskell.org/~ghcup/x86_64-mingw64-ghcup.exe" `
             -OutFile "$env:RUNNER_TEMP\ghcup.exe"
 
+      - name: Restore GHCup download cache
+        uses: actions/cache@v4
+        with:
+          path: C:\ghcup\cache
+          key: ghcup-windows-${{ inputs.ghc }}-${{ inputs.cabal }}-${{ inputs.hls }}-${{ inputs.stack }}
+
       - name: Build portable toolchain
         shell: powershell
         run: |

@@ -13,7 +13,7 @@ Set-StrictMode -Version Latest
 
 function Invoke-GhcupInstall([string]$Tool, [string]$Version, [string]$Destination) {
     Write-Host "Installing $Tool $Version into $Destination"
-    & $Ghcup install $Tool $Version --isolate $Destination
+    & $Ghcup --cache install $Tool $Version --isolate $Destination
     if ($LASTEXITCODE -ne 0) {
         throw "ghcup failed to install $Tool $Version"
     }
@@ -37,6 +37,12 @@ Copy-Item -LiteralPath (Join-Path $repoRoot "LICENSE") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "THIRD_PARTY_NOTICES.md") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "examples") -Destination $payload -Recurse
 
+# Validate the actual isolated layouts before spending time compressing them.
+& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $payload "Enter-PortableHaskell.ps1") -Check
+if ($LASTEXITCODE -ne 0) {
+    throw "The unpacked portable environment failed its smoke test."
+}
+
 $ghcExe = Join-Path $payload "ghc\bin\ghc.exe"
 if (-not (Test-Path -LiteralPath $ghcExe)) {
     throw "GHC isolated install does not contain ghc.exe at the expected location."
@@ -52,7 +58,7 @@ $sevenZip = Get-Command 7z -ErrorAction SilentlyContinue
 Push-Location $payload
 try {
     if ($sevenZip) {
-        & $sevenZip.Source a -tzip -mx=9 $archive ".\*"
+        & $sevenZip.Source a -tzip -mx=5 $archive ".\*"
         if ($LASTEXITCODE -ne 0) { throw "7-Zip failed." }
     } else {
         Compress-Archive -Path ".\*" -DestinationPath $archive -CompressionLevel Optimal
