@@ -41,7 +41,7 @@ if ($Check) {
     foreach ($tool in @("ghc", "ghci", "cabal", "haskell-language-server-wrapper", "stack")) {
         $resolved = Get-Command $tool -ErrorAction SilentlyContinue
         if (-not $resolved) {
-            throw "缺少工具: $tool"
+            throw "Missing tool: $tool"
         }
         Write-Host ("{0}: {1}" -f $tool, $resolved.Source)
     }
@@ -59,6 +59,6 @@ $host.UI.RawUI.WindowTitle = "Portable Haskell"
 Write-Host "Portable Haskell environment" -ForegroundColor Green
 Write-Host ("GHC:   " + (& ghc --numeric-version))
 Write-Host ("Cabal: " + (& cabal --numeric-version))
-Write-Host "目录可移动；当前会话不会修改系统 PATH。" -ForegroundColor DarkGray
+Write-Host "This folder can be moved; the current session does not modify the system PATH." -ForegroundColor DarkGray
 & $env:ComSpec /K "prompt (portable-haskell) `$P`$G"
 
