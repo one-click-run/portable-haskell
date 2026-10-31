@@ -60,7 +60,7 @@ ghc examples\hello\Main.hs -o hello.exe
 3. 输入版本，或保留 `recommended`。
 4. 运行工作流。
 
-工作流会通过 GHCup 隔离安装各工具、执行烟雾测试、生成 ZIP 与 SHA-256，并上传到固定的 `toolchain` Release。安装器会自动列出该 Release 中所有兼容资产。
+工作流会通过 GHCup 隔离安装各工具、执行烟雾测试、生成 ZIP 与 SHA-256，并上传到固定的 `toolchain` Release。上传后还会从公开 Release 重新运行一行安装器、校验归档并编译 Hello World。安装器会自动列出该 Release 中所有兼容资产。
 
 ## 安全与来源
 

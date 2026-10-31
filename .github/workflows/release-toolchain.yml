@@ -74,3 +74,33 @@ jobs:
             ${{ runner.temp }}/dist/*.zip
             ${{ runner.temp }}/dist/*.sha256
 
+      - name: End-to-end test the public one-line installer
+        shell: powershell
+        run: |
+          $testRoot = Join-Path $env:RUNNER_TEMP "public-installer-e2e"
+          New-Item -ItemType Directory -Path $testRoot -Force | Out-Null
+          Push-Location $testRoot
+          try {
+            $asset = (Get-ChildItem "$env:RUNNER_TEMP\dist\portable-haskell-*.zip" | Select-Object -First 1).Name
+            $env:ONE_CLICK_RUN_PORTABLE_HASKELL_SELECTED_ASSET = $asset
+            $env:ONE_CLICK_RUN_PORTABLE_HASKELL_INSTALL_NAME = "e2e"
+            $installer = "https://raw.githubusercontent.com/$env:GITHUB_REPOSITORY/$env:GITHUB_SHA/init.ps1"
+            Invoke-RestMethod $installer | Invoke-Expression
+
+            $portableRoot = Join-Path $testRoot "OCR-portable-haskell-e2e"
+            $enter = Join-Path $portableRoot "Enter-PortableHaskell.ps1"
+            & powershell -NoProfile -ExecutionPolicy Bypass -File $enter -Check
+            if ($LASTEXITCODE -ne 0) { throw "Public installation self-check failed." }
+
+            $main = Join-Path $portableRoot "examples\hello\Main.hs"
+            $hello = Join-Path $testRoot "hello.exe"
+            & powershell -NoProfile -ExecutionPolicy Bypass -File $enter -Command @("ghc", $main, "-o", $hello)
+            if ($LASTEXITCODE -ne 0) { throw "Hello World compilation failed." }
+            $output = (& $hello).Trim()
+            if ($output -ne "Hello from portable Haskell!") {
+              throw "Unexpected Hello World output: $output"
+            }
+          } finally {
+            Pop-Location
+          }
+
