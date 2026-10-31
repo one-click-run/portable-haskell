@@ -22,7 +22,7 @@ foreach ($toolRoot in @("ghc", "cabal", "hls", "stack")) {
 }
 
 $workspace = Join-Path $root "examples\hello"
-$lspLauncher = Join-Path $root "Launch-Haskell-LSP.cmd"
+$lspLauncher = Join-Path $root "Launch-Haskell-LSP.exe"
 if (-not (Test-Path -LiteralPath $lspLauncher -PathType Leaf)) { throw "HLS launcher is missing: $lspLauncher" }
 $settingsPath = Join-Path $workspace ".vscode\settings.json"
 $settings = [ordered]@{

@@ -24,6 +24,10 @@ foreach ($file in $files) {
     Write-Host "Syntax OK: $file"
 }
 
+& node --check (Join-Path $repoRoot "scripts\test-node-spawn.js")
+if ($LASTEXITCODE -ne 0) { throw "JavaScript syntax validation failed for scripts\test-node-spawn.js" }
+Write-Host "Syntax OK: scripts\test-node-spawn.js"
+
 $init = Get-Content -LiteralPath (Join-Path $repoRoot "init.ps1") -Raw
 foreach ($required in @("Get-FileHash", "SHA-256", "browser_download_url", "Enter-PortableHaskell.ps1", "--continue-at", "--retry-all-errors", '$Archive', '$localArchive')) {
     if (-not $init.Contains($required)) {
@@ -61,6 +65,8 @@ foreach ($requiredFile in @("OFFLINE-GUARANTEE.md", "BUILDING.md", "REPRODUCING.
 }
 foreach ($requiredFile in @(
     "Launch-Haskell-LSP.cmd",
+    "native\Launch-Haskell-LSP.c",
+    "scripts\test-node-spawn.js",
     "examples\hello\hello.cabal",
     "examples\hello\hie.yaml",
     "examples\hello\.vscode\settings.json",

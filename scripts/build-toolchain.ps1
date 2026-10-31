@@ -37,6 +37,15 @@ Copy-Item -LiteralPath (Join-Path $repoRoot "Enter-PortableHaskell.ps1") -Destin
 Copy-Item -LiteralPath (Join-Path $repoRoot "Launch-Haskell-LSP.cmd") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "Launch-Haskell-LSP.ps1") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "Open-PortableHaskell-VSCode.ps1") -Destination $payload
+$payloadSources = Join-Path $payload "sources"
+New-Item -ItemType Directory -Path $payloadSources -Force | Out-Null
+$launcherSource = Join-Path $payloadSources "Launch-Haskell-LSP.c"
+Copy-Item -LiteralPath (Join-Path $repoRoot "native\Launch-Haskell-LSP.c") -Destination $launcherSource
+$clang = Join-Path $payload "ghc\mingw\bin\clang.exe"
+if (-not (Test-Path -LiteralPath $clang -PathType Leaf)) { throw "Bundled Clang compiler is missing: $clang" }
+$nativeLauncher = Join-Path $payload "Launch-Haskell-LSP.exe"
+& $clang -O2 -municode $launcherSource -o $nativeLauncher
+if ($LASTEXITCODE -ne 0) { throw "Failed to build the native HLS launcher." }
 Copy-Item -LiteralPath (Join-Path $repoRoot "LICENSE") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "THIRD_PARTY_NOTICES.md") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "OFFLINE-GUARANTEE.md") -Destination $payload
@@ -83,6 +92,15 @@ $manifest = [ordered]@{
         source = "https://downloads.haskell.org/~ghcup/x86_64-mingw64-ghcup.exe"
         sha256 = $GhcupSha256
     }
+    customArtifacts = @(
+        [ordered]@{
+            path = "Launch-Haskell-LSP.exe"
+            source = "sources/Launch-Haskell-LSP.c"
+            compiler = "GHC-bundled Clang"
+            sourceSha256 = (Get-FileHash -LiteralPath $launcherSource -Algorithm SHA256).Hash.ToLowerInvariant()
+            binarySha256 = (Get-FileHash -LiteralPath $nativeLauncher -Algorithm SHA256).Hash.ToLowerInvariant()
+        }
+    )
     components = @(
         [ordered]@{ name = "GHC"; version = $resolvedGhcVersion; source = "ghcup"; license = "BSD-3-Clause" },
         [ordered]@{ name = "cabal-install"; version = $resolvedCabalVersion; source = "ghcup"; license = "BSD-3-Clause" },

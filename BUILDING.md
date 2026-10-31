@@ -11,7 +11,11 @@ GHCup aliases are not used for official releases.
 The build downloads GHCup, records its observed SHA-256, and asks GHCup to
 install every component into an isolated payload. GHCup verifies the upstream
 archives against its metadata. The script removes HLS servers that do not match
-the bundled GHC, runs the portable self-check, and produces the ZIP.
+the bundled GHC. It then compiles `sources/Launch-Haskell-LSP.c` with the Clang
+shipped inside that same GHC distribution. This small native launcher is needed
+because VS Code's Node process cannot spawn a `.cmd` file as an LSP executable
+on Windows. The C source is copied into the ZIP, and both source and executable
+hashes are recorded in `SOURCE-MANIFEST.json` before the self-check and ZIP step.
 
 Each archive contains:
 
@@ -19,6 +23,8 @@ Each archive contains:
 - `SBOM.spdx.json`, an SPDX 2.3 software bill of materials;
 - `THIRD_PARTY_NOTICES.md` and upstream license files;
 - `OFFLINE-GUARANTEE.md`, defining what works without the network.
+- `sources/Launch-Haskell-LSP.c`, the exact source used for the native VS Code
+  launcher included as `Launch-Haskell-LSP.exe`.
 
 The same manifest and SBOM are also separate Release assets. To rebuild with a
 preserved GHCup executable, pass its local path and checksum:

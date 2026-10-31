@@ -23,11 +23,16 @@
 1. GitHub Actions 检出上面的仓库提交，并下载 GHCup。
 2. 工作流计算并记录当次使用的 GHCup SHA-256；本仓库的现行版本复现入口会要求该哈希与发布记录一致。
 3. `scripts/build-toolchain.ps1` 让 GHCup 将四个固定版本隔离安装到 `.build/payload`，不会从维护者电脑复制已有工具。
-4. 脚本只保留与 GHC `9.10.3` 匹配的 HLS server，然后加入启动器、示例、许可证和离线说明。
-5. 未压缩目录先执行 `Enter-PortableHaskell.ps1 -Check`。
-6. 目录被压缩为 ZIP，并生成 SHA-256、来源清单和 SPDX SBOM。
-7. 工作流把网络代理指向不可用端口，从本地 ZIP 安装并编译、运行 Hello World，以检查离线能力。
-8. 发布后，工作流再从公开 Release 运行一次一行安装器和编译测试。
+4. 脚本只保留与 GHC `9.10.3` 匹配的 HLS server，然后用该 GHC 自带的 Clang 编译
+   `native/Launch-Haskell-LSP.c`。这个原生入口解决 VS Code/Node 在 Windows 上不能把
+   `.cmd` 直接作为 LSP 子进程启动的问题；ZIP 同时保留完全相同的 C 源码。
+5. `SOURCE-MANIFEST.json` 记录原生入口的源码路径、编译器说明、源码 SHA-256 和 EXE SHA-256，
+   然后加入示例、许可证和离线说明。
+6. 未压缩目录先执行 `Enter-PortableHaskell.ps1 -Check`。
+7. 目录被压缩为 ZIP，并生成 SHA-256、来源清单和 SPDX SBOM。
+8. 工作流把网络代理指向不可用端口，从本地 ZIP 安装并编译、运行 Hello World，执行真实 LSP 握手，
+   并通过 Node `spawn(..., {shell:false})` 模拟 VS Code 的启动方式。
+9. 发布后，工作流再从公开 Release 运行一次相同的一行安装器、编译和 LSP 测试。
 
 流程的可执行定义分别是
 [`release-toolchain.yml`](.github/workflows/release-toolchain.yml) 和

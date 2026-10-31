@@ -77,12 +77,14 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw "Offline launcher self-check failed." }
             & powershell -NoProfile -ExecutionPolicy Bypass -File "$root\Open-PortableHaskell-VSCode.ps1" -Check
             if ($LASTEXITCODE -ne 0) { throw "Offline VS Code integration check failed." }
+            & node "$env:GITHUB_WORKSPACE\scripts\test-node-spawn.js" "$root\Launch-Haskell-LSP.exe"
+            if ($LASTEXITCODE -ne 0) { throw "VS Code-compatible native spawn test failed." }
             & "$root\ghc\bin\ghc.exe" "$root\examples\hello\Main.hs" -o "$testRoot\hello.exe"
             if ($LASTEXITCODE -ne 0 -or ((& "$testRoot\hello.exe").Trim() -ne "Hello from portable Haskell!")) {
               throw "Offline Hello World test failed."
             }
             & "$env:GITHUB_WORKSPACE\scripts\test-lsp-protocol.ps1" `
-              -ServerCommand "$root\Launch-Haskell-LSP.cmd" `
+              -ServerCommand "$root\Launch-Haskell-LSP.exe" `
               -ServerArguments '--lsp' `
               -WorkingDirectory "$root\examples\hello"
           } finally { Pop-Location }
@@ -127,6 +129,8 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw "Public installation self-check failed." }
             & powershell -NoProfile -ExecutionPolicy Bypass -File "$portableRoot\Open-PortableHaskell-VSCode.ps1" -Check
             if ($LASTEXITCODE -ne 0) { throw "Public VS Code integration check failed." }
+            & node "$env:GITHUB_WORKSPACE\scripts\test-node-spawn.js" "$portableRoot\Launch-Haskell-LSP.exe"
+            if ($LASTEXITCODE -ne 0) { throw "Public VS Code-compatible native spawn test failed." }
 
             $main = Join-Path $portableRoot "examples\hello\Main.hs"
             $hello = Join-Path $testRoot "hello.exe"
@@ -137,7 +141,7 @@ jobs:
               throw "Unexpected Hello World output: $output"
             }
             & "$env:GITHUB_WORKSPACE\scripts\test-lsp-protocol.ps1" `
-              -ServerCommand "$portableRoot\Launch-Haskell-LSP.cmd" `
+              -ServerCommand "$portableRoot\Launch-Haskell-LSP.exe" `
               -ServerArguments '--lsp' `
               -WorkingDirectory "$portableRoot\examples\hello"
           } finally {
