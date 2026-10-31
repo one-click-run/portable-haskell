@@ -30,6 +30,9 @@ irm "https://raw.githubusercontent.com/one-click-run/portable-haskell/main/init.
 ```
 
 安装完成后，双击生成的 `OCR-portable-haskell-<版本>.cmd`。
+如果已经安装 VS Code，还可以双击相邻的 `OCR-portable-haskell-<版本>-VSCode.cmd`：
+它会用便携工具链打开包内 Hello World 工程，并让 Haskell 扩展通过自包含包装器
+启动包内 HLS，不需要修改系统环境变量。未安装 `haskell.haskell` 扩展时会显示提示。
 
 完全离线的目标机器可以先从 Release 复制 ZIP 和相邻的 `.sha256` 文件，再运行：
 

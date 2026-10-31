@@ -34,6 +34,9 @@ Invoke-GhcupInstall "hls" $HlsVersion (Join-Path $payload "hls")
 Invoke-GhcupInstall "stack" $StackVersion (Join-Path $payload "stack")
 
 Copy-Item -LiteralPath (Join-Path $repoRoot "Enter-PortableHaskell.ps1") -Destination $payload
+Copy-Item -LiteralPath (Join-Path $repoRoot "Launch-Haskell-LSP.cmd") -Destination $payload
+Copy-Item -LiteralPath (Join-Path $repoRoot "Launch-Haskell-LSP.ps1") -Destination $payload
+Copy-Item -LiteralPath (Join-Path $repoRoot "Open-PortableHaskell-VSCode.ps1") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "LICENSE") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "THIRD_PARTY_NOTICES.md") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "OFFLINE-GUARANTEE.md") -Destination $payload

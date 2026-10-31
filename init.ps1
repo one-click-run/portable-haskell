@@ -123,7 +123,8 @@ if ($InstallName -notmatch '^[A-Za-z0-9._-]+$') {
 $folderName = "OCR-portable-haskell-$InstallName"
 $destination = Join-Path $installBase $folderName
 $launcher = Join-Path $installBase "$folderName.cmd"
-if ((Test-Path -LiteralPath $destination) -or (Test-Path -LiteralPath $launcher)) {
+$vscodeLauncher = Join-Path $installBase "$folderName-VSCode.cmd"
+if ((Test-Path -LiteralPath $destination) -or (Test-Path -LiteralPath $launcher) -or (Test-Path -LiteralPath $vscodeLauncher)) {
     if (-not $Force) {
         throw "$folderName already exists. Choose another name or set ONE_CLICK_RUN_PORTABLE_HASKELL_FORCE=1 to replace it."
     }
@@ -132,6 +133,9 @@ if ((Test-Path -LiteralPath $destination) -or (Test-Path -LiteralPath $launcher)
     }
     if (Test-Path -LiteralPath $launcher) {
         Remove-Item -LiteralPath $launcher -Force
+    }
+    if (Test-Path -LiteralPath $vscodeLauncher) {
+        Remove-Item -LiteralPath $vscodeLauncher -Force
     }
 }
 
@@ -210,6 +214,13 @@ cd /d "%~dp0"
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0$folderName\Enter-PortableHaskell.ps1"
 "@
     [IO.File]::WriteAllText($launcher, $launcherContent, [Text.UTF8Encoding]::new($false))
+
+    $vscodeLauncherContent = @"
+@echo off
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0$folderName\Open-PortableHaskell-VSCode.ps1"
+if errorlevel 1 pause
+"@
+    [IO.File]::WriteAllText($vscodeLauncher, $vscodeLauncherContent, [Text.UTF8Encoding]::new($false))
     $installationComplete = $true
 } finally {
     if ($installationComplete -and (Test-Path -LiteralPath $work)) {
@@ -224,4 +235,5 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0$folderName\Enter-Port
 
 Write-Step "Installation complete"
 Write-Host "Double-click $folderName.cmd to enter the portable Haskell environment." -ForegroundColor Green
+Write-Host "Double-click $folderName-VSCode.cmd to open the bundled example in VS Code." -ForegroundColor Green
 
