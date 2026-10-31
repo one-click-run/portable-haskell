@@ -37,17 +37,32 @@ Copy-Item -LiteralPath (Join-Path $repoRoot "LICENSE") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "THIRD_PARTY_NOTICES.md") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "examples") -Destination $payload -Recurse
 
+$ghcExe = Join-Path $payload "ghc\bin\ghc.exe"
+if (-not (Test-Path -LiteralPath $ghcExe)) {
+    throw "GHC isolated install does not contain ghc.exe at the expected location."
+}
+$resolvedGhcVersion = (& $ghcExe --numeric-version).Trim()
+
+# GHCup's HLS archive contains servers for every supported GHC. A portable
+# bundle ships one GHC, so retain only its matching server and the wrapper.
+$hlsExecutables = @(Get-ChildItem -LiteralPath (Join-Path $payload "hls") -Filter "haskell-language-server-*.exe" -Recurse)
+$hlsExecutables | Where-Object {
+    $_.BaseName -ne "haskell-language-server-wrapper" -and
+    $_.BaseName -notlike "haskell-language-server-$resolvedGhcVersion*"
+} | Remove-Item -Force
+
+$matchingHls = @(Get-ChildItem -LiteralPath (Join-Path $payload "hls") -Filter "haskell-language-server-$resolvedGhcVersion*.exe" -Recurse)
+$hlsWrapper = @(Get-ChildItem -LiteralPath (Join-Path $payload "hls") -Filter "haskell-language-server-wrapper.exe" -Recurse)
+if ($matchingHls.Count -eq 0 -or $hlsWrapper.Count -eq 0) {
+    throw "HLS does not contain both a wrapper and a server for GHC $resolvedGhcVersion."
+}
+
 # Validate the actual isolated layouts before spending time compressing them.
 & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $payload "Enter-PortableHaskell.ps1") -Check
 if ($LASTEXITCODE -ne 0) {
     throw "The unpacked portable environment failed its smoke test."
 }
 
-$ghcExe = Join-Path $payload "ghc\bin\ghc.exe"
-if (-not (Test-Path -LiteralPath $ghcExe)) {
-    throw "GHC isolated install does not contain ghc.exe at the expected location."
-}
-$resolvedGhcVersion = (& $ghcExe --numeric-version).Trim()
 $assetName = "portable-haskell-ghc-$resolvedGhcVersion-windows-x86_64.zip"
 $archive = Join-Path $OutputDirectory $assetName
 if (Test-Path -LiteralPath $archive) {

@@ -42,6 +42,8 @@ irm "https://raw.githubusercontent.com/one-click-run/portable-haskell/main/init.
 - GHC 附带的 MinGW 工具链
 - `examples/hello/Main.hs` 示例
 
+为控制下载体积，发布包只保留与包内 GHC 精确匹配的 HLS 服务器，不携带其他 GHC 版本的 HLS 二进制文件。
+
 进入环境后可以运行：
 
 ```console
