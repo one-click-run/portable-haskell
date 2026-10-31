@@ -113,6 +113,7 @@ if ($checksumAsset.Count -ne 1) {
 
 $work = Join-Path $installBase ".$folderName.installing"
 $archive = Join-Path $work $asset.name
+$checksumFile = Join-Path $work $checksumName
 $staging = Join-Path $work "payload"
 try {
     if (Test-Path -LiteralPath $work) {
@@ -122,7 +123,8 @@ try {
 
     Write-Step "Downloading $($asset.name)"
     Receive-File -Uri $asset.browser_download_url -Destination $archive
-    $checksumText = (Invoke-WebRequest -Uri $checksumAsset[0].browser_download_url -Headers $headers).Content
+    Receive-File -Uri $checksumAsset[0].browser_download_url -Destination $checksumFile
+    $checksumText = [IO.File]::ReadAllText($checksumFile)
     $expected = ([regex]::Match($checksumText, '(?i)\b[0-9a-f]{64}\b')).Value.ToLowerInvariant()
     if (-not $expected) {
         throw "Could not parse the SHA-256 checksum file."
