@@ -90,6 +90,10 @@ jobs:
             Windows x86-64 portable Haskell toolchain built from GHCup-verified upstream binaries.
 
             Every ZIP has a matching SHA-256 file. The installer refuses unverified archives.
+
+            Build source: `${{ github.sha }}`
+            Build log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            How the archive is made and reproduced: https://github.com/${{ github.repository }}/blob/${{ github.sha }}/REPRODUCING.md
           prerelease: false
           make_latest: false
           overwrite_files: true

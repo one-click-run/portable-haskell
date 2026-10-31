@@ -8,6 +8,19 @@
 
 目前仅支持 Windows x86-64。
 
+## 这个压缩包从哪里来
+
+发布包不是人工整理后上传的黑盒。它由本仓库的
+[`scripts/build-toolchain.ps1`](scripts/build-toolchain.ps1) 在干净的 Windows
+GitHub Actions 运行器中生成：记录 GHCup 的 SHA-256，按明确版本取得
+GHC、Cabal、HLS 和 Stack，组装便携目录，运行离线编译测试，最后生成 ZIP、
+校验文件、来源清单和 SBOM。
+
+现行发布包所用的精确版本、GHCup 哈希、构建提交和复现命令都列在
+[`REPRODUCING.md`](REPRODUCING.md)。完整自动构建过程可直接查看
+[`Publish toolchain` 工作流](.github/workflows/release-toolchain.yml)，没有未公开的
+本地打包步骤。
+
 ## 使用
 
 在希望创建环境的目录中打开 PowerShell，执行：
@@ -70,7 +83,7 @@ ghc examples\hello\Main.hs -o hello.exe
 3. 输入版本，或保留 `recommended`。
 4. 运行工作流。
 
-工作流使用明确版本通过 GHCup 隔离安装各工具，生成来源清单和 SBOM，执行本地归档离线安装与编译测试，再生成 ZIP 与 SHA-256 并上传到固定的 `toolchain` Release。上传后还会从公开 Release 重新运行一行安装器。构建和审计说明见 [BUILDING.md](BUILDING.md)。
+工作流使用明确版本通过 GHCup 隔离安装各工具，生成来源清单和 SBOM，执行本地归档离线安装与编译测试，再生成 ZIP 与 SHA-256 并上传到固定的 `toolchain` Release。上传后还会从公开 Release 重新运行一行安装器。构建原理见 [BUILDING.md](BUILDING.md)，现行版本的精确来源与复现命令见 [REPRODUCING.md](REPRODUCING.md)。
 
 ## 安全与来源
 

@@ -1,5 +1,9 @@
 # Building and auditing a release
 
+For the exact inputs, public build log, Chinese step-by-step explanation, audit
+commands, and reproduction entry point for the current release, see
+[`REPRODUCING.md`](REPRODUCING.md).
+
 The published archive is assembled by `scripts/build-toolchain.ps1`. The
 workflow passes exact versions for GHC, cabal-install, HLS, and Stack; floating
 GHCup aliases are not used for official releases.

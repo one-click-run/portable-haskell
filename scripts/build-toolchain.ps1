@@ -37,6 +37,7 @@ Copy-Item -LiteralPath (Join-Path $repoRoot "Enter-PortableHaskell.ps1") -Destin
 Copy-Item -LiteralPath (Join-Path $repoRoot "LICENSE") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "THIRD_PARTY_NOTICES.md") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "OFFLINE-GUARANTEE.md") -Destination $payload
+Copy-Item -LiteralPath (Join-Path $repoRoot "REPRODUCING.md") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "examples") -Destination $payload -Recurse
 
 $ghcExe = Join-Path $payload "ghc\bin\ghc.exe"

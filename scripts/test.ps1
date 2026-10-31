@@ -5,7 +5,8 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $files = @(
     "init.ps1",
     "Enter-PortableHaskell.ps1",
-    "scripts\build-toolchain.ps1"
+    "scripts\build-toolchain.ps1",
+    "scripts\reproduce-release.ps1"
 )
 
 foreach ($file in $files) {
@@ -39,7 +40,7 @@ foreach ($forbidden in @("Invoke-WebRequest", "Invoke-RestMethod", "curl.exe", "
     }
 }
 
-foreach ($requiredFile in @("OFFLINE-GUARANTEE.md", "BUILDING.md")) {
+foreach ($requiredFile in @("OFFLINE-GUARANTEE.md", "BUILDING.md", "REPRODUCING.md")) {
     if (-not (Test-Path -LiteralPath (Join-Path $repoRoot $requiredFile))) {
         throw "Missing release documentation: $requiredFile"
     }
