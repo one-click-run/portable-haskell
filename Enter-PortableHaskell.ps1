@@ -1,6 +1,4 @@
 param(
-    [Parameter(ValueFromRemainingArguments = $true)]
-    [string[]]$Command,
     [switch]$Check
 )
 
@@ -56,11 +54,6 @@ if ($Check) {
     & ghc --numeric-version
     & cabal --numeric-version
     exit 0
-}
-
-if ($Command -and $Command.Count -gt 0) {
-    & $Command[0] @($Command | Select-Object -Skip 1)
-    exit $LASTEXITCODE
 }
 
 $host.UI.RawUI.WindowTitle = "Portable Haskell"
