@@ -58,12 +58,15 @@ function Install-BundledExtensions([string]$VSCode, $Manifest) {
     $extensionsDir = Join-Path $data "vscode-extensions"
     $userSettingsDir = Join-Path $userData "User"
     New-Item -ItemType Directory -Path $extensionsDir, $userSettingsDir -Force | Out-Null
-    $isolatedSettings = [ordered]@{
-        "extensions.autoCheckUpdates" = $false
-        "extensions.autoUpdate" = $false
-        "telemetry.telemetryLevel" = "off"
+    $settingsPath = Join-Path $userSettingsDir "settings.json"
+    if (-not (Test-Path -LiteralPath $settingsPath -PathType Leaf)) {
+        $isolatedSettings = [ordered]@{
+            "extensions.autoCheckUpdates" = $false
+            "extensions.autoUpdate" = $false
+            "telemetry.telemetryLevel" = "off"
+        }
+        [IO.File]::WriteAllText($settingsPath, (($isolatedSettings | ConvertTo-Json) + [Environment]::NewLine), [Text.UTF8Encoding]::new($false))
     }
-    [IO.File]::WriteAllText((Join-Path $userSettingsDir "settings.json"), (($isolatedSettings | ConvertTo-Json) + [Environment]::NewLine), [Text.UTF8Encoding]::new($false))
 
     $installed = @(& $VSCode --user-data-dir $userData --extensions-dir $extensionsDir --list-extensions --show-versions 2>&1)
     if ($LASTEXITCODE -ne 0) { throw "VS Code could not inspect the portable extension directory." }
@@ -80,7 +83,7 @@ function Install-BundledExtensions([string]$VSCode, $Manifest) {
         $expected = "$($extension.id)@$($extension.version)"
         if ($installed -notcontains $expected) { throw "Portable extension verification failed: $expected" }
     }
-    return [pscustomobject]@{ UserData = $userData; Extensions = $extensionsDir }
+    return [pscustomobject]@{ UserData = $userData; Settings = $settingsPath; Extensions = $extensionsDir }
 }
 
 $env:CABAL_DIR = Join-Path $data "cabal"
