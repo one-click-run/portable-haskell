@@ -21,7 +21,7 @@ foreach ($file in $files) {
 }
 
 $init = Get-Content -LiteralPath (Join-Path $repoRoot "init.ps1") -Raw
-foreach ($required in @("Get-FileHash", "SHA-256", "browser_download_url", "Enter-PortableHaskell.ps1")) {
+foreach ($required in @("Get-FileHash", "SHA-256", "browser_download_url", "Enter-PortableHaskell.ps1", "--continue-at", "--retry-all-errors")) {
     if (-not $init.Contains($required)) {
         throw "init.ps1 is missing required installer behavior: $required"
     }

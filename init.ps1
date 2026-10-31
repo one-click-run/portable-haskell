@@ -14,6 +14,22 @@ function Write-Step([string]$Message) {
     Write-Host "==> $Message" -ForegroundColor Cyan
 }
 
+function Receive-File([string]$Uri, [string]$Destination) {
+    $curl = Get-Command curl.exe -ErrorAction SilentlyContinue
+    if ($curl) {
+        # GitHub release assets can be large. Resume a partial transfer and retry
+        # transient network failures instead of restarting a multi-GB download.
+        & $curl.Source --fail --location --retry 8 --retry-delay 2 --retry-all-errors `
+            --continue-at - --output $Destination $Uri
+        if ($LASTEXITCODE -ne 0) {
+            throw "curl failed to download $Uri (exit code $LASTEXITCODE)."
+        }
+        return
+    }
+
+    Invoke-WebRequest -Uri $Uri -Headers $headers -OutFile $Destination
+}
+
 function Select-Asset($Assets) {
     if ($SelectedAsset) {
         $match = @($Assets | Where-Object { $_.name -eq $SelectedAsset })
@@ -105,7 +121,7 @@ try {
     New-Item -ItemType Directory -Path $work, $staging | Out-Null
 
     Write-Step "Downloading $($asset.name)"
-    Invoke-WebRequest -Uri $asset.browser_download_url -Headers $headers -OutFile $archive
+    Receive-File -Uri $asset.browser_download_url -Destination $archive
     $checksumText = (Invoke-WebRequest -Uri $checksumAsset[0].browser_download_url -Headers $headers).Content
     $expected = ([regex]::Match($checksumText, '(?i)\b[0-9a-f]{64}\b')).Value.ToLowerInvariant()
     if (-not $expected) {
