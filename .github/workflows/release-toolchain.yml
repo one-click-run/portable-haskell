@@ -83,10 +83,11 @@ jobs:
             if ($LASTEXITCODE -ne 0 -or ((& "$testRoot\hello.exe").Trim() -ne "Hello from portable Haskell!")) {
               throw "Offline Hello World test failed."
             }
-            & "$env:GITHUB_WORKSPACE\scripts\test-lsp-protocol.ps1" `
-              -ServerCommand "$root\Launch-Haskell-LSP.exe" `
-              -ServerArguments '--lsp' `
-              -WorkingDirectory "$root\examples\hello"
+            & node "$env:GITHUB_WORKSPACE\scripts\test-hls-hover.js" `
+              "$root\Launch-Haskell-LSP.exe" `
+              "$root\examples\hello" `
+              "$root\examples\hello\Main.hs"
+            if ($LASTEXITCODE -ne 0) { throw "Haskell hover test failed." }
           } finally { Pop-Location }
 
       - name: Publish organization-hosted assets
@@ -140,10 +141,11 @@ jobs:
             if ($output -ne "Hello from portable Haskell!") {
               throw "Unexpected Hello World output: $output"
             }
-            & "$env:GITHUB_WORKSPACE\scripts\test-lsp-protocol.ps1" `
-              -ServerCommand "$portableRoot\Launch-Haskell-LSP.exe" `
-              -ServerArguments '--lsp' `
-              -WorkingDirectory "$portableRoot\examples\hello"
+            & node "$env:GITHUB_WORKSPACE\scripts\test-hls-hover.js" `
+              "$portableRoot\Launch-Haskell-LSP.exe" `
+              "$portableRoot\examples\hello" `
+              "$portableRoot\examples\hello\Main.hs"
+            if ($LASTEXITCODE -ne 0) { throw "Public Haskell hover test failed." }
           } finally {
             Pop-Location
           }

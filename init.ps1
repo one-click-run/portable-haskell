@@ -217,8 +217,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0$folderName\Enter-Port
 
     $vscodeLauncherContent = @"
 @echo off
+setlocal
+title Portable Haskell - VS Code
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0$folderName\Open-PortableHaskell-VSCode.ps1"
-if errorlevel 1 pause
+set "OCR_EXIT=%ERRORLEVEL%"
+if not "%OCR_EXIT%"=="0" (
+  echo.
+  echo Portable Haskell VS Code startup failed. See the message above.
+  pause
+)
+exit /b %OCR_EXIT%
 "@
     [IO.File]::WriteAllText($vscodeLauncher, $vscodeLauncherContent, [Text.UTF8Encoding]::new($false))
     $installationComplete = $true
