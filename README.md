@@ -33,9 +33,10 @@ irm "https://raw.githubusercontent.com/one-click-run/portable-haskell/main/init.
 如果已经安装 VS Code，还可以双击相邻的 `OCR-portable-haskell-<版本>-VSCode.cmd`：
 它会用便携工具链打开包内 Hello World 工程，并让 Haskell 扩展通过自包含包装器
 启动包内原生 HLS 入口，不需要修改系统环境变量。这个入口的可复现 C 源码位于
-`native/Launch-Haskell-LSP.c`。入口会检查 VS Code、示例、HLS 启动器和
-`haskell.haskell` 扩展；扩展缺失时会先征得同意才联网安装，拒绝后不会继续启动。
-所有专用设置只写入包内自动生成的 `Portable-Haskell.code-workspace`，不会修改 VS Code
+`native/Launch-Haskell-LSP.c`。发布包同时内置固定版本的 `haskell.haskell` 与其
+`haskell.language-haskell` 依赖；入口会校验 VSIX 后离线安装到包内独立扩展目录，
+不会访问 Marketplace，也不会读写用户的全局扩展目录。专用设置只写入包内自动生成的
+`Portable-Haskell.code-workspace` 和隔离的 VS Code 用户数据目录，不会修改 VS Code
 用户设置或示例目录的 `.vscode/settings.json`。自定义 VS Code 位置可通过
 `ONE_CLICK_RUN_VSCODE` 指向 `code.cmd` 或 `Code.exe`。
 

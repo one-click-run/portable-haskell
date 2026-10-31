@@ -45,10 +45,20 @@ foreach ($required in @('$vscodeLauncher', 'Open-PortableHaskell-VSCode.ps1')) {
     if (-not $init.Contains($required)) { throw "init.ps1 is missing the VS Code entry point: $required" }
 }
 $vscodeEntry = Get-Content -LiteralPath (Join-Path $repoRoot "Open-PortableHaskell-VSCode.ps1") -Raw
-foreach ($required in @("Portable-Haskell.code-workspace", "ONE_CLICK_RUN_VSCODE", "haskell.haskell", "--list-extensions")) {
+foreach ($required in @("Portable-Haskell.code-workspace", "ONE_CLICK_RUN_VSCODE", "--extensions-dir", "--user-data-dir", "extensions.autoUpdate")) {
     if (-not $vscodeEntry.Contains($required)) { throw "VS Code entry point is missing prerequisite or isolation behavior: $required" }
 }
 if ($vscodeEntry.Contains('.vscode\settings.json')) { throw "VS Code entry point must not modify folder settings." }
+$extensionManifest = Get-Content -LiteralPath (Join-Path $repoRoot "vscode-extensions\manifest.json") -Raw | ConvertFrom-Json
+if (@($extensionManifest.extensions).Count -ne 2) { throw "Haskell release must pin both client and syntax VSIX files." }
+if (@($extensionManifest.extensions.id) -notcontains 'haskell.haskell' -or @($extensionManifest.extensions.id) -notcontains 'haskell.language-haskell') {
+    throw "Haskell VSIX manifest is missing a required extension."
+}
+foreach ($extension in $extensionManifest.extensions) {
+    if ($extension.sha256 -notmatch '^[0-9a-f]{64}$' -or $extension.downloadUrl -notlike 'https://github.com/one-click-run/portable-haskell/releases/*') {
+        throw "Invalid self-hosted VSIX metadata for $($extension.id)."
+    }
+}
 if ($init -match '(?m)^\s*Expand-Archive\b') {
     throw "init.ps1 must not use the unreliable Windows PowerShell Expand-Archive path."
 }
@@ -75,6 +85,7 @@ foreach ($requiredFile in @(
     "native\Launch-Haskell-LSP.c",
     "scripts\test-node-spawn.js",
     "scripts\test-hls-hover.js",
+    "vscode-extensions\manifest.json",
     "examples\hello\hello.cabal",
     "examples\hello\hie.yaml",
     "examples\hello\.vscode\extensions.json"

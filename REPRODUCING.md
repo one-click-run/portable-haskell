@@ -27,7 +27,8 @@
    `native/Launch-Haskell-LSP.c`。这个原生入口解决 VS Code/Node 在 Windows 上不能把
    `.cmd` 直接作为 LSP 子进程启动的问题；ZIP 同时保留完全相同的 C 源码。
 5. `SOURCE-MANIFEST.json` 记录原生入口的源码路径、编译器说明、源码 SHA-256 和 EXE SHA-256，
-   然后加入示例、许可证和离线说明。
+   构建还从本组织的 `vscode-extensions` Release 获取 manifest 固定的两个 VSIX，逐个校验
+   SHA-256，然后加入示例、许可证和离线说明。运行时不再访问 Marketplace。
 6. 未压缩目录先执行 `Enter-PortableHaskell.ps1 -Check`。
 7. 目录被压缩为 ZIP，并生成 SHA-256、来源清单和 SPDX SBOM。
 8. 工作流把网络代理指向不可用端口，从本地 ZIP 安装并编译、运行 Hello World，执行真实 LSP 握手，

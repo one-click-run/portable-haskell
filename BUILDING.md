@@ -16,6 +16,9 @@ shipped inside that same GHC distribution. This small native launcher is needed
 because VS Code's Node process cannot spawn a `.cmd` file as an LSP executable
 on Windows. The C source is copied into the ZIP, and both source and executable
 hashes are recorded in `SOURCE-MANIFEST.json` before the self-check and ZIP step.
+The two pinned VSIX files listed in `vscode-extensions/manifest.json` are fetched
+from this organization's immutable-version input Release, verified by SHA-256,
+and copied into the payload. They are not fetched at runtime.
 
 Each archive contains:
 
@@ -25,6 +28,7 @@ Each archive contains:
 - `OFFLINE-GUARANTEE.md`, defining what works without the network.
 - `sources/Launch-Haskell-LSP.c`, the exact source used for the native VS Code
   launcher included as `Launch-Haskell-LSP.exe`.
+- `vscode-extensions/`, containing pinned offline VSIX files and their manifest.
 
 The same manifest and SBOM are also separate Release assets. To rebuild with a
 preserved GHCup executable, pass its local path and checksum:

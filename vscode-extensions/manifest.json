@@ -1,0 +1,23 @@
+{
+  "minimumVSCodeVersion": "1.102.0",
+  "extensions": [
+    {
+      "id": "haskell.language-haskell",
+      "version": "3.8.0",
+      "file": "haskell.language-haskell-3.8.0.vsix",
+      "sha256": "c031af18a23e603c246d8295d228e7077f8dc163d902ec0b378329155dfb285b",
+      "downloadUrl": "https://github.com/one-click-run/portable-haskell/releases/download/vscode-extensions/haskell.language-haskell-3.8.0.vsix",
+      "upstream": "https://github.com/haskell/vscode-haskell-syntax-highlighting",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "id": "haskell.haskell",
+      "version": "2.8.3",
+      "file": "haskell.haskell-2.8.3.vsix",
+      "sha256": "a7eed8cb4d2ec3097671c840ad7dd0a14c22711645e88cef6b04d8810b29f422",
+      "downloadUrl": "https://github.com/one-click-run/portable-haskell/releases/download/vscode-extensions/haskell.haskell-2.8.3.vsix",
+      "upstream": "https://github.com/haskell/vscode-haskell",
+      "license": "MIT"
+    }
+  ]
+}

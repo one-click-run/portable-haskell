@@ -52,6 +52,22 @@ Copy-Item -LiteralPath (Join-Path $repoRoot "OFFLINE-GUARANTEE.md") -Destination
 Copy-Item -LiteralPath (Join-Path $repoRoot "REPRODUCING.md") -Destination $payload
 Copy-Item -LiteralPath (Join-Path $repoRoot "examples") -Destination $payload -Recurse
 
+# The VSIX files are pinned and hosted by this organization so runtime use
+# never depends on the Visual Studio Marketplace.
+$extensionManifestSource = Join-Path $repoRoot "vscode-extensions\manifest.json"
+$extensionManifest = Get-Content -LiteralPath $extensionManifestSource -Raw | ConvertFrom-Json
+$payloadExtensions = Join-Path $payload "vscode-extensions"
+New-Item -ItemType Directory -Path $payloadExtensions -Force | Out-Null
+Copy-Item -LiteralPath $extensionManifestSource -Destination (Join-Path $payloadExtensions "extensions.json")
+foreach ($extension in $extensionManifest.extensions) {
+    $destination = Join-Path $payloadExtensions $extension.file
+    Invoke-WebRequest -Uri $extension.downloadUrl -UseBasicParsing -OutFile $destination
+    $actualHash = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($actualHash -ne $extension.sha256) {
+        throw "VSIX checksum mismatch for $($extension.file): expected $($extension.sha256), got $actualHash"
+    }
+}
+
 $ghcExe = Join-Path $payload "ghc\bin\ghc.exe"
 if (-not (Test-Path -LiteralPath $ghcExe)) {
     throw "GHC isolated install does not contain ghc.exe at the expected location."
@@ -106,7 +122,9 @@ $manifest = [ordered]@{
         [ordered]@{ name = "cabal-install"; version = $resolvedCabalVersion; source = "ghcup"; license = "BSD-3-Clause" },
         [ordered]@{ name = "haskell-language-server"; version = $resolvedHlsVersion; source = "ghcup"; license = "Apache-2.0" },
         [ordered]@{ name = "stack"; version = $resolvedStackVersion; source = "ghcup"; license = "BSD-3-Clause" }
-    )
+    ) + @($extensionManifest.extensions | ForEach-Object {
+        [ordered]@{ name = "VS Code extension $($_.id)"; version = $_.version; source = $_.upstream; hostedInput = $_.downloadUrl; sha256 = $_.sha256; license = $_.license }
+    })
 }
 $manifestJson = $manifest | ConvertTo-Json -Depth 8
 [IO.File]::WriteAllText((Join-Path $payload "SOURCE-MANIFEST.json"), $manifestJson + "`n", [Text.UTF8Encoding]::new($false))

@@ -2,11 +2,12 @@
 
 After the release ZIP and its adjacent SHA-256 file have been obtained, the
 bundled GHC, GHCi, Cabal executable, Haskell Language Server, Stack executable,
-MinGW toolchain, standard libraries, and included examples can be started,
+MinGW toolchain, pinned VS Code extensions, standard libraries, and included examples can be started,
 compiled, and run without a network connection.
 
 The launcher never downloads files, checks for updates, or contacts a package
-index. It only configures paths inside its own directory.
+index. Bundled VSIX files are installed into an isolated extension directory;
+extension updates are disabled there. VS Code itself must already be installed.
 
 This guarantee does not include packages that are absent from the archive.
 Commands such as `cabal update`, `cabal install`, and Stack operations that need
