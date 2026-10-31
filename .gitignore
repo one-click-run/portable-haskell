@@ -1,0 +1,7 @@
+.build/
+*.partial
+*.zip
+*.sha256
+OCR-portable-haskell-*/
+OCR-portable-haskell-*.cmd
+

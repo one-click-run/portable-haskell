@@ -1,0 +1,69 @@
+name: Publish toolchain
+
+on:
+  workflow_dispatch:
+    inputs:
+      ghc:
+        description: GHC version or GHCup tag
+        required: true
+        default: recommended
+      cabal:
+        description: cabal-install version or GHCup tag
+        required: true
+        default: recommended
+      hls:
+        description: HLS version or GHCup tag
+        required: true
+        default: recommended
+      stack:
+        description: Stack version or GHCup tag
+        required: true
+        default: recommended
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download GHCup
+        shell: powershell
+        run: |
+          Invoke-WebRequest `
+            -Uri "https://downloads.haskell.org/~ghcup/x86_64-mingw64-ghcup.exe" `
+            -OutFile "$env:RUNNER_TEMP\ghcup.exe"
+
+      - name: Build portable toolchain
+        shell: powershell
+        run: |
+          .\scripts\build-toolchain.ps1 `
+            -GhcVersion '${{ inputs.ghc }}' `
+            -CabalVersion '${{ inputs.cabal }}' `
+            -HlsVersion '${{ inputs.hls }}' `
+            -StackVersion '${{ inputs.stack }}' `
+            -OutputDirectory "$env:RUNNER_TEMP\dist" `
+            -Ghcup "$env:RUNNER_TEMP\ghcup.exe"
+
+      - name: Smoke test unpacked environment
+        shell: powershell
+        run: .\.build\payload\Enter-PortableHaskell.ps1 -Check
+
+      - name: Publish organization-hosted assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: Portable Haskell toolchain
+          body: |
+            Windows x86-64 portable Haskell toolchain built from GHCup-verified upstream binaries.
+
+            Every ZIP has a matching SHA-256 file. The installer refuses unverified archives.
+          prerelease: false
+          make_latest: false
+          files: |
+            ${{ runner.temp }}/dist/*.zip
+            ${{ runner.temp }}/dist/*.sha256
+
