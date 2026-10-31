@@ -20,6 +20,7 @@ $env:XDG_CACHE_HOME = Join-Path $data "xdg-cache"
 $env:XDG_CONFIG_HOME = Join-Path $data "xdg-config"
 $env:XDG_DATA_HOME = Join-Path $data "xdg-data"
 $env:XDG_STATE_HOME = Join-Path $data "xdg-state"
+$env:ONE_CLICK_RUN_OFFLINE_RUNTIME = "1"
 
 @($env:CABAL_DIR, $env:STACK_ROOT, $env:XDG_CACHE_HOME, $env:XDG_CONFIG_HOME, $env:XDG_DATA_HOME, $env:XDG_STATE_HOME) |
     ForEach-Object { New-Item -ItemType Directory -Path $_ -Force | Out-Null }
@@ -61,5 +62,6 @@ Write-Host "Portable Haskell environment" -ForegroundColor Green
 Write-Host ("GHC:   " + (& ghc --numeric-version))
 Write-Host ("Cabal: " + (& cabal --numeric-version))
 Write-Host "This folder can be moved; the current session does not modify the system PATH." -ForegroundColor DarkGray
+Write-Host "Bundled tools work offline. cabal/stack may use the network only when you explicitly request external packages." -ForegroundColor DarkGray
 & $env:ComSpec /K "prompt (portable-haskell) `$P`$G"
 
